@@ -4,7 +4,8 @@
   "description": "portfolio site implemented in node.js",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,7 @@
     "url": "https://github.com/yonedaco/node-me/issues"
   },
   "homepage": "https://github.com/yonedaco/node-me#readme",
-  "engines":{
+  "engines": {
     "node": "v8.9.1"
   },
   "dependencies": {
