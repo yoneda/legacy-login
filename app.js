@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require("body-parser");
 var request = require("request");
+var moment = require("moment");
 var app = express();
 
 // 静的ファイル(image,css,javascript) をpublic フォルダに格納。
@@ -22,7 +23,12 @@ app.get("/",function(req,res){
     var json = JSON.parse(body);
     var pages = json.pages;
     for(var key in pages){
-      console.log(pages[key].title);
+      var title = pages[key].title;
+      var url = "https://scrapbox.io/yoneda/" + title;
+      console.log(url);
+      var timestamp = pages[key].created;
+      var date = moment.unix(timestamp);
+      var dateFormat = date.format("YYYY/MM");
     }
   });
   res.render("index.ejs");
