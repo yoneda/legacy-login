@@ -1,5 +1,5 @@
 {
-  "name": "me",
+  "name": "yoneda",
   "version": "1.0.0",
   "description": "portfolio site implemented in node.js",
   "main": "app.js",
@@ -16,6 +16,9 @@
     "url": "https://github.com/yonedaco/node-me/issues"
   },
   "homepage": "https://github.com/yonedaco/node-me#readme",
+  "engines":{
+    "node": "v8.9.1"
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "ejs": "^2.5.7",
