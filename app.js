@@ -26,9 +26,9 @@ app.get("/",function(req,res){
     for(var key in pages){
       var title = pages[key].title;
       var url = "https://scrapbox.io/yoneda/" + title;
-      var timestamp = pages[key].created;
+      var timestamp = pages[key].updated;
       var date = moment.unix(timestamp);
-      var dateFormat = date.format("YYYY/MM");
+      var dateFormat = date.format("YYYY/MM/DD");
       scrapbox.push([title,dateFormat,url]);
     }
     res.render("index.ejs",{scrapbox:scrapbox});
