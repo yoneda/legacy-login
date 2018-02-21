@@ -2,7 +2,7 @@
   "name": "me",
   "version": "1.0.0",
   "description": "portfolio site implemented in node.js",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/yonedaco/node-me/issues"
   },
-  "homepage": "https://github.com/yonedaco/node-me#readme"
+  "homepage": "https://github.com/yonedaco/node-me#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2"
+  }
 }
