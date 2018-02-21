@@ -22,16 +22,17 @@ app.get("/",function(req,res){
   request("https://scrapbox.io/api/pages/yoneda/?limit=3",function(error,response,body){
     var json = JSON.parse(body);
     var pages = json.pages;
+    var scrapbox = [];
     for(var key in pages){
       var title = pages[key].title;
       var url = "https://scrapbox.io/yoneda/" + title;
-      console.log(url);
       var timestamp = pages[key].created;
       var date = moment.unix(timestamp);
       var dateFormat = date.format("YYYY/MM");
+      scrapbox.push([title,dateFormat,url]);
     }
+    res.render("index.ejs",{scrapbox:scrapbox});
   });
-  res.render("index.ejs");
 });
 
 app.listen(3000);
