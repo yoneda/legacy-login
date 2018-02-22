@@ -11,3 +11,16 @@ a:link, a:visited{
 	margin-right: auto;
 	text-align: left;
 }
+
+a.social-icon{
+  display: inline-block;
+  border-radius: 5px;
+}
+
+.social-icon:first-of-type{
+	margin-left:15px;
+}
+
+a.social-icon:hover{
+  background-color:#F5F5F5;
+}
