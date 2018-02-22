@@ -19,6 +19,28 @@ app.set("view engine","ejs");
 
 // トップ画面
 app.get("/",function(req,res){
+  var qiitaOptions = {
+    url:"https://qiita.com/api/v2/authenticated_user/items?page=1&per_page=3",
+    headers:{
+      "Authorization":"Bearer 5eeb08d5be63b3f42ba5d43b4ee359c3a5132f6a",
+      "Content-Type":"application/json"
+    }
+  };
+  request(qiitaOptions,function(error,response,body){
+    var json = JSON.parse(body);
+    var pages = json;
+    var qiita = [];
+    for(var page of pages){
+      var title = page.title;
+      var url = page.url;
+      var created_at = page.created_at;
+      var date = moment.utc(created_at);
+      var dateFormat = date.format("YYYY/MM/DD");
+      console.log(dateFormat);
+    }
+  })
+  // Scrapbox の API にアクセス
+  /*
   request("https://scrapbox.io/api/pages/yoneda/?limit=3",function(error,response,body){
     var json = JSON.parse(body);
     var pages = json.pages;
@@ -32,7 +54,7 @@ app.get("/",function(req,res){
       scrapbox.push([title,dateFormat,url]);
     }
     res.render("index.ejs",{scrapbox:scrapbox});
-  });
+  });*/
 });
 
 app.listen(3000);
