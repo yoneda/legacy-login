@@ -1,60 +1,32 @@
-var express = require('express');
-var bodyParser = require("body-parser");
-var request = require("request");
-var moment = require("moment");
-var app = express();
+const express = require("express");
+const bodyParser = require("body-parser");
+const ejs = require("ejs");
+const app = express();
 
 // 静的ファイル(image,css,javascript) をpublic フォルダに格納。
 // test.pngにアクセスしたいときは、
 // http://localhost:3000/test.png
-app.use(express.static(__dirname+"/public"));
+app.use(express.static(__dirname + "/public"));
 
 // bodyParser の初期化
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // ejs の初期化
-app.set("views",__dirname + "/views");
-app.set("view engine","ejs");
+app.set("views", __dirname + "/views");
+app.set("view engine", "ejs");
 
-// トップ画面
-app.get("/",function(req,res){
-  // Qiita の API にアクセス
-  var qiitaOptions = {
-    url:"https://qiita.com/api/v2/authenticated_user/items?page=1&per_page=3",
-    headers:{
-      "Authorization":"Bearer 5eeb08d5be63b3f42ba5d43b4ee359c3a5132f6a",
-      "Content-Type":"application/json"
-    }
-  };
-  request(qiitaOptions,function(error,response,body){
-    var json = JSON.parse(body);
-    var pages = json;
-    var qiita = [];
-    for(var page of pages){
-      var title = page.title;
-      var url = page.url;
-      var created_at = page.created_at;
-      var date = moment.utc(created_at);
-      var dateFormat = date.format("YYYY/MM/DD");
-      qiita.push([title,dateFormat,url]);
-    }
-    // Scrapbox の API にアクセス
-    request("https://scrapbox.io/api/pages/yoneda/?limit=3",function(error,response,body){
-      var json = JSON.parse(body);
-      var pages = json.pages;
-      var scrapbox = [];
-      for(var key in pages){
-        var title = pages[key].title;
-        var url = "https://scrapbox.io/yoneda/" + title;
-        var timestamp = pages[key].updated;
-        var date = moment.unix(timestamp);
-        var dateFormat = date.format("YYYY/MM/DD");
-        scrapbox.push([title,dateFormat,url]);
-      }
-      res.render("index.ejs",{scrapbox:scrapbox,qiita:qiita});
-  })
-  });
+const topView = `
+<div>
+  <h2>Bookmark</h2>
+  <h3>user:</h3>
+  <div><%= user.mail %></div>
+</div>
+`;
+app.get("/", (req, res) => {
+  const user = { mail: "test@gmail.com" };
+  const html = ejs.render(topView, { user });
+  res.send(html);
 });
 
 app.listen(3000);
