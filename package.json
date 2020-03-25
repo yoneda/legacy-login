@@ -19,9 +19,12 @@
   "homepage": "https://github.com/yonedaco/node-me#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "dayjs": "^1.8.23",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
+    "knex": "^0.20.13",
     "moment": "^2.20.1",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "sqlite3": "^4.1.1"
   }
 }
