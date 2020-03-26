@@ -1,7 +1,22 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const asyncHandler = require("express-async-handler");
 const ejs = require("ejs");
 const app = express();
+
+// initilize knex
+const knex = require("knex")({
+  client: "sqlite3",
+  connection: {
+    filename: "./dev.sqlite3"
+  },
+  migrations: {
+    directory: "migrations"
+  },
+  seeds: {
+    directory: "seeds"
+  }
+});
 
 // 静的ファイル(image,css,javascript) をpublic フォルダに格納。
 // test.pngにアクセスしたいときは、
@@ -28,5 +43,15 @@ app.get("/", (req, res) => {
   const html = ejs.render(topView, { user });
   res.send(html);
 });
+
+// REST API
+app.get(
+  "/api/users/:id",
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const user = await knex("users").where({ id });
+    res.json(user);
+  })
+);
 
 app.listen(3000);
