@@ -9,7 +9,6 @@ exports.up = function(knex) {
       table.increments("id");
       table.string("title");
       table.string("url");
-      table.datetime("createdAt");
       table.integer("user");
     });
 };

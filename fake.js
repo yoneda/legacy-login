@@ -1,10 +1,3 @@
-const dayjs = require("dayjs");
-
-const randDatetime = () =>
-  dayjs()
-    .subtract(Math.floor(Math.random() * 60), "day")
-    .format("YYYY-M-D H:mm:ss");
-
 const fake = {
   users: [
     {
@@ -23,21 +16,18 @@ const fake = {
       id: 1,
       title: "dev.to",
       url: "https://dev.to/",
-      createdAt: randDatetime(),
       user: 1
     },
     {
       id: 2,
       title: "Qiita",
       url: "https://qiita.com/",
-      createdAt: randDatetime(),
       user: 1
     },
     {
       id: 3,
       title: "google",
       url: "https://www.google.com/",
-      createdAt: randDatetime(),
       user: 2
     }
   ]

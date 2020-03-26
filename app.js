@@ -15,7 +15,8 @@ const knex = require("knex")({
   },
   seeds: {
     directory: "seeds"
-  }
+  },
+  useNullAsDefault: true
 });
 
 // 静的ファイル(image,css,javascript) をpublic フォルダに格納。
@@ -30,19 +31,6 @@ app.use(bodyParser.json());
 // ejs の初期化
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
-
-const topView = `
-<div>
-  <h2>Bookmark</h2>
-  <h3>user:</h3>
-  <div><%= user.mail %></div>
-</div>
-`;
-app.get("/", (req, res) => {
-  const user = { mail: "test@gmail.com" };
-  const html = ejs.render(topView, { user });
-  res.send(html);
-});
 
 // REST API
 app.get(
@@ -60,6 +48,59 @@ app.get(
     const { user } = req.query;
     const bookmarks = await knex("bookmarks").where({ user });
     res.json(bookmarks);
+  })
+);
+
+app.post(
+  "/api/bookmarks",
+  asyncHandler(async (req, res) => {
+    const { title, url } = req.body;
+    const success = await knex("bookmarks").insert({ title, url, user: 1 });
+    res.json(success);
+  })
+);
+
+// Pages
+app.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const view = `
+    <div>
+      <h2>Bookmark</h2>
+      <h3>User:</h3>
+      <%= user.mail %>
+      <h3>Contents:</h3>
+      <% bookmarks.forEach(item=>{ %>
+        <div>title: <%= item.title %></div>
+        <div>url: <%= item.url %></div>
+      <% }); %>
+      <h3>Add:</h3>
+      <form action="/" method="post" autocomplete="off">
+        <input type="text" name="title" placeholder="title" /><br />
+        <input type="text" name="url" placeholder="url" /><br />
+        <input type="submit" value="submit" /><br />
+      </form>
+    </div>
+    `;
+    const user = await knex("users")
+      .where({ id: 1 })
+      .then(items => items[0]);
+    const bookmarks = await knex("bookmarks").where({ user: 1 });
+    const html = ejs.render(view, { user, bookmarks });
+    res.send(html);
+  })
+);
+
+app.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    const { title, url } = req.body;
+    const success = await knex("bookmarks")
+      .insert({ title, url, user: 1 })
+      .catch( err => {
+        res.send("エラーが発生しました。");
+      });
+    res.redirect("/");
   })
 );
 
