@@ -54,4 +54,13 @@ app.get(
   })
 );
 
+app.get(
+  "/api/bookmarks",
+  asyncHandler(async (req, res) => {
+    const { user } = req.query;
+    const bookmarks = await knex("bookmarks").where({ user });
+    res.json(bookmarks);
+  })
+);
+
 app.listen(3000);
