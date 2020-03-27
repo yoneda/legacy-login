@@ -104,4 +104,46 @@ app.post(
   })
 );
 
+app.get(
+  "/signup",
+  asyncHandler(async (req, res) => {
+    const view = `
+    <div>
+      <h2>Bookmark</h2>
+      <h3>Sighup:</h3>
+      <button>github</button><br />
+      <button>twitter</button><br /><br />
+      <form action="/" method="post" autocomplete="off">
+        <input type="text" name="mail" placeholder="mail" /><br />
+        <input type="text" name="password" placeholder="password" /><br />
+        <input type="submit" value="create" /><br />
+      </form>
+    </div>
+    `;
+    const html = ejs.render(view, {});
+    res.send(html);
+  })
+);
+
+app.get(
+  "/login",
+  asyncHandler(async (req, res) => {
+    const view = `
+    <div>
+      <h2>Bookmark</h2>
+      <h3>Sighup:</h3>
+      <button>github</button><br />
+      <button>twitter</button><br /><br />
+      <form action="/" method="post" autocomplete="off">
+        <input type="text" name="mail" placeholder="mail" /><br />
+        <input type="text" name="password" placeholder="password" /><br />
+        <input type="submit" value="login" /><br />
+      </form>
+    </div>
+    `;
+    const html = ejs.render(view, {});
+    res.send(html);
+  })
+);
+
 app.listen(3000);
