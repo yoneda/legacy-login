@@ -61,12 +61,23 @@ app.post(
 );
 
 // Pages
+
+const nav = `
+<div>
+  <span><a href="/">home</a></span>
+  <span> |</span>
+  <span><a href="/signup">signup</a></span>
+  <span> |</span>
+  <span><a href="/login">login</a></span>
+</div>
+`;
 app.get(
   "/",
   asyncHandler(async (req, res) => {
     const view = `
     <div>
       <h2>Bookmark</h2>
+      <%- nav %>
       <h3>User:</h3>
       <%= user.mail %>
       <h3>Contents:</h3>
@@ -86,7 +97,7 @@ app.get(
       .where({ id: 1 })
       .then(items => items[0]);
     const bookmarks = await knex("bookmarks").where({ user: 1 });
-    const html = ejs.render(view, { user, bookmarks });
+    const html = ejs.render(view, { user, bookmarks, nav });
     res.send(html);
   })
 );
@@ -97,7 +108,7 @@ app.post(
     const { title, url } = req.body;
     const success = await knex("bookmarks")
       .insert({ title, url, user: 1 })
-      .catch( err => {
+      .catch(err => {
         res.send("エラーが発生しました。");
       });
     res.redirect("/");
@@ -110,6 +121,7 @@ app.get(
     const view = `
     <div>
       <h2>Bookmark</h2>
+      <%- nav %>
       <h3>Sighup:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
@@ -120,7 +132,7 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, {});
+    const html = ejs.render(view, { nav });
     res.send(html);
   })
 );
@@ -131,6 +143,7 @@ app.get(
     const view = `
     <div>
       <h2>Bookmark</h2>
+      <%- nav %>
       <h3>Sighup:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
@@ -141,7 +154,7 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, {});
+    const html = ejs.render(view, { nav });
     res.send(html);
   })
 );
