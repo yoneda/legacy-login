@@ -26,7 +26,7 @@ app.use(
     secret: "legacy",
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 10000 } // 10秒で消える
+    cookie: { maxAge: 60000 } // 60秒で消える
   })
 );
 
@@ -80,11 +80,18 @@ const nav = `
   <span><a href="/signup">signup</a></span>
   <span> |</span>
   <span><a href="/login">login</a></span>
+  <span> |</span>
+  <span><a href="/logout">logout</a></span>
 </div>
 `;
+
 app.get(
   "/",
   asyncHandler(async (req, res) => {
+    const user = req.session.user;
+    if(user===undefined){
+      res.redirect("/login");
+    }
     const view = `
     <div>
       <h2>Bookmark</h2>
@@ -104,10 +111,7 @@ app.get(
       </form>
     </div>
     `;
-    const user = await knex("users")
-      .where({ id: 1 })
-      .then(items => items[0]);
-    const bookmarks = await knex("bookmarks").where({ user: 1 });
+    const bookmarks = await knex("bookmarks").where({ user: user.id });
     const html = ejs.render(view, { user, bookmarks, nav });
     res.send(html);
   })
@@ -116,13 +120,30 @@ app.get(
 app.post(
   "/",
   asyncHandler(async (req, res) => {
+    const { mail, password: pass } = req.body;
     const { title, url } = req.body;
-    const success = await knex("bookmarks")
-      .insert({ title, url, user: 1 })
-      .catch(err => {
-        res.send("エラーが発生しました。");
-      });
-    res.redirect("/");
+
+    if (title && url) {
+      const user = req.session.user;
+      const success = await knex("bookmarks")
+        .insert({ title, url, user: user.id })
+        .catch(err => {
+          res.send("エラーが発生しました。");
+        });
+      res.redirect("/");
+    }
+
+    if (mail && pass) {
+      const users = await knex("users").where({ mail, pass });
+      if (users.length === 1) {
+        // 認証成功
+        req.session.user = users[0];
+        res.redirect("/");
+      } else {
+        // 認証失敗
+        res.redirect("/login");
+      }
+    }
   })
 );
 
@@ -167,6 +188,15 @@ app.get(
     `;
     const html = ejs.render(view, { nav });
     res.send(html);
+  })
+);
+
+app.get(
+  "/logout",
+  asyncHandler(async (req, res) => {
+    req.session.destroy(() => {
+      res.redirect("/login");
+    });
   })
 );
 
