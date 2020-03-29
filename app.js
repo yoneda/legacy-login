@@ -85,7 +85,7 @@ const nav = `
 </div>
 `;
 
-const LoginedNav = `
+const loginedNav = `
 <div>
   <span><a href="/">home</a></span>
   <span> |</span>
@@ -120,7 +120,7 @@ app.get(
     </div>
     `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = ejs.render(view, { user, bookmarks, nav:LoginedNav });
+    const html = ejs.render(view, { user, bookmarks, nav: loginedNav });
     return res.send(html);
   })
 );
