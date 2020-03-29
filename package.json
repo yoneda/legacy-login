@@ -24,6 +24,7 @@
     "ejs": "^2.5.7",
     "express": "^4.16.2",
     "express-async-handler": "^1.1.4",
+    "express-session": "^1.17.0",
     "knex": "^0.20.13",
     "sqlite3": "^4.1.1"
   },

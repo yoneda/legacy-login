@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
+const session = require("express-session");
 const ejs = require("ejs");
 const app = express();
 
@@ -18,6 +19,16 @@ const knex = require("knex")({
   },
   useNullAsDefault: true
 });
+
+// initialize session
+app.use(
+  session({
+    secret: "legacy",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 10000 } // 10秒で消える
+  })
+);
 
 // 静的ファイル(image,css,javascript) をpublic フォルダに格納。
 // test.pngにアクセスしたいときは、
@@ -155,6 +166,28 @@ app.get(
     </div>
     `;
     const html = ejs.render(view, { nav });
+    res.send(html);
+  })
+);
+
+app.get(
+  "/session-test",
+  asyncHandler(async (req, res) => {
+    const view = `
+    <div>
+      <span>count is… <%= count %></span>
+      <span>expires in… <%= limit %></span>
+    </div>
+    `;
+    if (req.session.count) {
+      req.session.count++;
+    } else {
+      req.session.count = 1;
+    }
+    const html = ejs.render(view, {
+      count: req.session.count,
+      limit: req.session.cookie.maxAge / 1000
+    });
     res.send(html);
   })
 );
