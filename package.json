@@ -26,6 +26,7 @@
     "express-async-handler": "^1.1.4",
     "express-session": "^1.17.0",
     "knex": "^0.20.13",
+    "lodash": "^4.17.15",
     "sqlite3": "^4.1.1"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const session = require("express-session");
+const lodash = require("lodash");
 const ejs = require("ejs");
 const app = express();
 
@@ -49,7 +50,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const user = await knex("users").where({ id });
-    res.json(user);
+    return res.json(user);
   })
 );
 
@@ -58,7 +59,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const { user } = req.query;
     const bookmarks = await knex("bookmarks").where({ user });
-    res.json(bookmarks);
+    return res.json(bookmarks);
   })
 );
 
@@ -67,7 +68,7 @@ app.post(
   asyncHandler(async (req, res) => {
     const { title, url } = req.body;
     const success = await knex("bookmarks").insert({ title, url, user: 1 });
-    res.json(success);
+    return res.json(success);
   })
 );
 
@@ -87,10 +88,10 @@ const nav = `
 
 app.get(
   "/",
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const user = req.session.user;
-    if(user===undefined){
-      res.redirect("/login");
+    if (user === undefined) {
+      return res.redirect("/login");
     }
     const view = `
     <div>
@@ -113,37 +114,35 @@ app.get(
     `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
     const html = ejs.render(view, { user, bookmarks, nav });
-    res.send(html);
+    return res.send(html);
   })
 );
 
 app.post(
   "/",
-  asyncHandler(async (req, res) => {
-    const { mail, password: pass } = req.body;
-    const { title, url } = req.body;
+  asyncHandler(async (req, res, next) => {
+    const { title, url, mail, password: pass } = req.body;
+    const user = req.session.user;
 
-    if (title && url) {
-      const user = req.session.user;
-      const success = await knex("bookmarks")
-        .insert({ title, url, user: user.id })
-        .catch(err => {
-          res.send("エラーが発生しました。");
-        });
-      res.redirect("/");
-    }
-
-    if (mail && pass) {
+    // ログイン画面から飛んできた場合
+    if (lodash.isEmpty(user)) {
       const users = await knex("users").where({ mail, pass });
       if (users.length === 1) {
         // 認証成功
         req.session.user = users[0];
-        res.redirect("/");
-      } else {
-        // 認証失敗
-        res.redirect("/login");
+        return res.redirect("/");
       }
+      // 認証失敗
+      return res.redirect("/login");
     }
+
+    // ブックマーク追加のアクションが呼び出され自身から飛んできた場合
+    await knex("bookmarks")
+      .insert({ title, url, user: user.id })
+      .catch(err => {
+        return res.send("エラーが発生しました。");
+      });
+    return res.redirect("/");
   })
 );
 
@@ -165,7 +164,7 @@ app.get(
     </div>
     `;
     const html = ejs.render(view, { nav });
-    res.send(html);
+    return res.send(html);
   })
 );
 
@@ -176,7 +175,7 @@ app.get(
     <div>
       <h2>Bookmark</h2>
       <%- nav %>
-      <h3>Sighup:</h3>
+      <h3>Login:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
       <form action="/" method="post" autocomplete="off">
@@ -187,7 +186,7 @@ app.get(
     </div>
     `;
     const html = ejs.render(view, { nav });
-    res.send(html);
+    return res.send(html);
   })
 );
 
@@ -195,7 +194,7 @@ app.get(
   "/logout",
   asyncHandler(async (req, res) => {
     req.session.destroy(() => {
-      res.redirect("/login");
+      return res.redirect("/login");
     });
   })
 );
@@ -218,7 +217,7 @@ app.get(
       count: req.session.count,
       limit: req.session.cookie.maxAge / 1000
     });
-    res.send(html);
+    return res.send(html);
   })
 );
 
