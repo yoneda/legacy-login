@@ -44,6 +44,10 @@ app.use(bodyParser.json());
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
 
+// utils
+const validateMail = text => true; // TODO: メールアドレスのバリデーションを実装
+const validatePassword = text => true; // TODO: パスワードのバリデーションを実装
+
 // REST API
 app.get(
   "/api/users/:id",
