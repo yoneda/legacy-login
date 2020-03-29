@@ -132,22 +132,8 @@ app.get(
 app.post(
   "/",
   asyncHandler(async (req, res, next) => {
-    const { title, url, mail, password: pass } = req.body;
+    const { title, url } = req.body;
     const user = req.session.user;
-
-    // ログイン画面から飛んできた場合
-    if (lodash.isEmpty(user)) {
-      const users = await knex("users").where({ mail, pass });
-      if (users.length === 1) {
-        // 認証成功
-        req.session.user = users[0];
-        return res.redirect("/");
-      }
-      // 認証失敗
-      return res.redirect("/login");
-    }
-
-    // ブックマーク追加のアクションが呼び出され自身から飛んできた場合
     await knex("bookmarks")
       .insert({ title, url, user: user.id })
       .catch(err => {
@@ -167,7 +153,7 @@ app.get(
       <h3>Sighup:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
-      <form action="/" method="post" autocomplete="off">
+      <form action="/signup/callback" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="create" /><br />
@@ -176,6 +162,24 @@ app.get(
     `;
     const html = ejs.render(view, { nav });
     return res.send(html);
+  })
+);
+
+app.post(
+  "/signup/callback",
+  asyncHandler(async (req, res) => {
+    const { mail, password: pass } = req.body;
+    if (!(validateMail(mail) && validatePassword(pass))) {
+      // バリデーション失敗
+      return res.redirect("/signup");
+    }
+    // バリデーション成功
+    knex("users")
+      .insert({ mail, pass })
+      .catch(err => {
+        return res.send("エラーが発生しました。");
+      });
+    return res.redirect("/login");
   })
 );
 
@@ -189,7 +193,7 @@ app.get(
       <h3>Login:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
-      <form action="/" method="post" autocomplete="off">
+      <form action="/login/callback" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="login" /><br />
@@ -198,6 +202,22 @@ app.get(
     `;
     const html = ejs.render(view, { nav });
     return res.send(html);
+  })
+);
+
+app.post(
+  "/login/callback",
+  asyncHandler(async (req, res) => {
+    const { mail, password: pass } = req.body;
+
+    const users = await knex("users").where({ mail, pass });
+    if (users.length === 1) {
+      // 認証成功
+      req.session.user = users[0];
+      return res.redirect("/");
+    }
+    // 認証失敗
+    return res.redirect("/login");
   })
 );
 
