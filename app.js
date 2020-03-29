@@ -82,6 +82,13 @@ const nav = `
   <span> |</span>
   <span><a href="/login">login</a></span>
   <span> |</span>
+</div>
+`;
+
+const LoginedNav = `
+<div>
+  <span><a href="/">home</a></span>
+  <span> |</span>
   <span><a href="/logout">logout</a></span>
 </div>
 `;
@@ -113,7 +120,7 @@ app.get(
     </div>
     `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = ejs.render(view, { user, bookmarks, nav });
+    const html = ejs.render(view, { user, bookmarks, nav:LoginedNav });
     return res.send(html);
   })
 );
