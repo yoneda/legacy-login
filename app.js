@@ -102,7 +102,8 @@ app.get(
   asyncHandler(async (req, res, next) => {
     const user = req.session.user;
     if (user === undefined) {
-      return res.redirect("/login");
+      res.redirect("/login");
+      next();
     }
     const view = `
     <div>
@@ -119,13 +120,13 @@ app.get(
       <form action="/" method="post" autocomplete="off">
         <input type="text" name="title" placeholder="title" /><br />
         <input type="text" name="url" placeholder="url" /><br />
-        <input type="submit" value="submit" /><br />
+        <input type="sub mit" value="submit" /><br />
       </form>
     </div>
     `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
     const html = ejs.render(view, { user, bookmarks, nav: loginedNav });
-    return res.send(html);
+    res.send(html);
   })
 );
 
@@ -201,13 +202,13 @@ app.get(
     </div>
     `;
     const html = ejs.render(view, { nav });
-    return res.send(html);
+    res.send(html);
   })
 );
 
 app.post(
   "/login/callback",
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const { mail, password: pass } = req.body;
 
     const users = await knex("users").where({ mail, pass });
@@ -250,6 +251,31 @@ app.get(
     });
     return res.send(html);
   })
+);
+
+app.get(
+  "/onion/:id",
+  (req, res, next) => {
+    res.send("aa");
+    res.send("aa");
+    console.log("middleware A");
+    next();
+    console.log("middleware F");
+  },
+  (req, res, next) => {
+    console.log("middleware B");
+    next();
+    console.log("middleware E");
+  },
+  (req, res, next) => {
+    console.log("middleware C");
+    if(req.params.id==="1"){
+      res.send("hello");
+    }
+    res.send("no");
+    
+    console.log("middleware D");
+  }
 );
 
 app.listen(3000);
