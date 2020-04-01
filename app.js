@@ -49,7 +49,7 @@ app.set("view engine", "ejs");
 const validateMail = text => true; // TODO: メールアドレスのバリデーションを実装
 const validatePassword = text => true; // TODO: パスワードのバリデーションを実装
 
-let validateError = undefined;
+let error = undefined;
 
 // REST API
 app.get(
@@ -166,8 +166,8 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, { nav , error: validateError });
-    validateError = undefined;
+    const html = ejs.render(view, { nav , error });
+    error = undefined;
     return res.send(html);
   })
 );
@@ -179,7 +179,7 @@ app.post(
     if (validator.isEmail(mail)) {
       next();
     } else {
-      validateError = "メールアドレスの形式で入力ください";
+      error = "メールアドレスの形式で入力ください";
       res.redirect("/signup");
     }
   }),
@@ -188,7 +188,7 @@ app.post(
     if (validator.isLength(pass, { min: 4, max: 32 })) {
       next();
     } else {
-      validateError = "パスワードは4字以上32字以内で登録可能です";
+      error = "パスワードは4字以上32字以内で登録可能です";
       res.redirect("/signup");
     }
   }),
@@ -197,7 +197,7 @@ app.post(
     knex("users")
       .insert({ mail, pass })
       .catch(err => {
-        validateError = "エラーが発生しました。";
+        error = "エラーが発生しました。";
         res.redirect("/signup");
       });
     return res.redirect("/login");
@@ -214,6 +214,9 @@ app.get(
       <h3>Login:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
+      <% if(error) { %>
+        <div style="color: red;"><%= error %></div><br />
+      <% } %>
       <form action="/login/callback" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
@@ -221,7 +224,8 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, { nav });
+    const html = ejs.render(view, { nav, error });
+    error = undefined;
     res.send(html);
   })
 );
@@ -238,6 +242,7 @@ app.post(
       return res.redirect("/");
     }
     // 認証失敗
+    error = "正しいメールアドレスかパスワードを入力してください"
     return res.redirect("/login");
   })
 );
