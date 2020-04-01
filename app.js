@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const session = require("express-session");
 const lodash = require("lodash");
+const validator = require("validator");
 const ejs = require("ejs");
 const app = express();
 
@@ -47,6 +48,8 @@ app.set("view engine", "ejs");
 // utils
 const validateMail = text => true; // TODO: メールアドレスのバリデーションを実装
 const validatePassword = text => true; // TODO: パスワードのバリデーションを実装
+
+let validateError = undefined;
 
 // REST API
 app.get(
@@ -102,8 +105,7 @@ app.get(
   asyncHandler(async (req, res, next) => {
     const user = req.session.user;
     if (user === undefined) {
-      res.redirect("/login");
-      next();
+      return res.redirect("/login");
     }
     const view = `
     <div>
@@ -154,6 +156,9 @@ app.get(
       <h3>Sighup:</h3>
       <button>github</button><br />
       <button>twitter</button><br /><br />
+      <% if(error) { %>
+        <div style="color: red;"><%= error %></div><br />
+      <% } %>
       <form action="/signup/callback" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
@@ -161,24 +166,39 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, { nav });
+    const html = ejs.render(view, { nav , error: validateError });
+    validateError = undefined;
     return res.send(html);
   })
 );
 
 app.post(
   "/signup/callback",
+  asyncHandler(async (req, res, next) => {
+    const { mail } = req.body;
+    if (validator.isEmail(mail)) {
+      next();
+    } else {
+      validateError = "メールアドレスの形式で入力ください";
+      res.redirect("/signup");
+    }
+  }),
+  asyncHandler(async (req, res, next) => {
+    const { password: pass } = req.body;
+    if (validator.isLength(pass, { min: 4, max: 32 })) {
+      next();
+    } else {
+      validateError = "パスワードは4字以上32字以内で登録可能です";
+      res.redirect("/signup");
+    }
+  }),
   asyncHandler(async (req, res) => {
     const { mail, password: pass } = req.body;
-    if (!(validateMail(mail) && validatePassword(pass))) {
-      // バリデーション失敗
-      return res.redirect("/signup");
-    }
-    // バリデーション成功
     knex("users")
       .insert({ mail, pass })
       .catch(err => {
-        return res.send("エラーが発生しました。");
+        validateError = "エラーが発生しました。";
+        res.redirect("/signup");
       });
     return res.redirect("/login");
   })
@@ -269,11 +289,11 @@ app.get(
   },
   (req, res, next) => {
     console.log("middleware C");
-    if(req.params.id==="1"){
+    if (req.params.id === "1") {
       res.send("hello");
     }
     res.send("no");
-    
+
     console.log("middleware D");
   }
 );
