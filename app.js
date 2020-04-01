@@ -96,6 +96,8 @@ const loginedNav = `
 <div>
   <span><a href="/">home</a></span>
   <span> |</span>
+  <span><a href="/setting">setting</a></span>
+  <span> |</span>
   <span><a href="/logout">logout</a></span>
 </div>
 `;
@@ -166,7 +168,7 @@ app.get(
       </form>
     </div>
     `;
-    const html = ejs.render(view, { nav , error });
+    const html = ejs.render(view, { nav, error });
     error = undefined;
     return res.send(html);
   })
@@ -242,7 +244,7 @@ app.post(
       return res.redirect("/");
     }
     // 認証失敗
-    error = "正しいメールアドレスかパスワードを入力してください"
+    error = "正しいメールアドレスかパスワードを入力してください";
     return res.redirect("/login");
   })
 );
@@ -253,6 +255,65 @@ app.get(
     req.session.destroy(() => {
       return res.redirect("/login");
     });
+  })
+);
+
+app.get(
+  "/setting",
+  asyncHandler(async (req, res) => {
+    const view = `
+    <div>
+      <h2>Bookmark</h2>
+      <%- loginedNav %>
+      <h3>Change:</h3>
+      <% if(error) { %>
+        <div style="color: red;"><%= error %></div><br />
+      <% } %>
+      <form action="/setting/changePassword" method="post" autocomplete="off">
+        <input type="text" name="current" placeholder="current" /><br />
+        <input type="text" name="fresh" placeholder="fresh" /><br />
+        <input type="submit" value="update" /><br />
+      </form>
+    </div>
+    `;
+    const html = ejs.render(view, { loginedNav, error });
+    error = undefined;
+    return res.send(html);
+  })
+);
+
+app.post(
+  "/setting/changePassword",
+  asyncHandler(async (req, res, next) => {
+    const { current } = req.body;
+    const user = req.session.user;
+    console.log(current);
+    console.log(user);
+    if (current === user.pass) {
+      next();
+    } else {
+      error = "現在のパスワードが一致しません";
+      res.redirect("/setting");
+    }
+  }),
+  asyncHandler(async (req, res, next) => {
+    const { fresh } = req.body;
+    if (validator.isLength(fresh, { min: 4, max: 32 })) {
+      next();
+    } else {
+      error = "パスワードは4字以上32字以内で登録可能です";
+      res.redirect("/setting");
+    }
+  }),
+  asyncHandler(async (req, res, next) => {
+    const { fresh } = req.body;
+    const user = req.session.user;
+    const num = await knex("users")
+      .update({ pass: fresh })
+      .where({ id: user.id })
+      .then(result => result[0]);
+    console.log(num);
+    res.redirect("/");
   })
 );
 
