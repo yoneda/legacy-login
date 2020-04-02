@@ -247,6 +247,15 @@ app.post(
   })
 );
 
+app.post(
+  "/logout",
+  asyncHandler(async (req, res) => {
+    req.session.destroy(() => {
+      return res.redirect("/login");
+    });
+  })
+);
+
 app.get(
   "/setting",
   asyncHandler(async (req, res) => {
@@ -262,6 +271,10 @@ app.get(
         <input type="text" name="current" placeholder="current" /><br />
         <input type="text" name="fresh" placeholder="fresh" /><br />
         <input type="submit" value="update" /><br />
+      </form>
+      <h3>Logout:</h3>
+      <form action="/logout" method="post" autocomplete="off">
+        <input type="submit" value="logout" /><br />
       </form>
     </div>
     `;
