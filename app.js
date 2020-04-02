@@ -97,8 +97,6 @@ const loginedNav = `
   <span><a href="/">home</a></span>
   <span> |</span>
   <span><a href="/setting">setting</a></span>
-  <span> |</span>
-  <span><a href="/logout">logout</a></span>
 </div>
 `;
 
@@ -246,15 +244,6 @@ app.post(
     // 認証失敗
     error = "正しいメールアドレスかパスワードを入力してください";
     return res.redirect("/login");
-  })
-);
-
-app.get(
-  "/logout",
-  asyncHandler(async (req, res) => {
-    req.session.destroy(() => {
-      return res.redirect("/login");
-    });
   })
 );
 
