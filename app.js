@@ -157,7 +157,6 @@ app.get(
       <%- nav %>
       <h3>Sighup:</h3>
       <button>github</button><br />
-      <button>twitter</button><br /><br />
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
@@ -220,7 +219,6 @@ app.get(
       <%- nav %>
       <h3>Login:</h3>
       <button>github</button><br />
-      <button>twitter</button><br /><br />
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
