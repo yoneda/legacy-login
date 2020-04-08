@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const session = require("express-session");
-const lodash = require("lodash");
 const validator = require("validator");
 const ejs = require("ejs");
 const app = express();
@@ -11,15 +10,15 @@ const app = express();
 const knex = require("knex")({
   client: "sqlite3",
   connection: {
-    filename: "./dev.sqlite3"
+    filename: "./dev.sqlite3",
   },
   migrations: {
-    directory: "migrations"
+    directory: "migrations",
   },
   seeds: {
-    directory: "seeds"
+    directory: "seeds",
   },
-  useNullAsDefault: true
+  useNullAsDefault: true,
 });
 
 // initialize session
@@ -28,7 +27,7 @@ app.use(
     secret: "legacy",
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60000 } // 60秒で消える
+    cookie: { maxAge: 60 * 60 * 1000 }, // 1時間で消える
   })
 );
 
@@ -44,10 +43,6 @@ app.use(bodyParser.json());
 // ejs の初期化
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
-
-// utils
-const validateMail = text => true; // TODO: メールアドレスのバリデーションを実装
-const validatePassword = text => true; // TODO: パスワードのバリデーションを実装
 
 let error = undefined;
 
@@ -122,7 +117,7 @@ app.get(
       <form action="/" method="post" autocomplete="off">
         <input type="text" name="title" placeholder="title" /><br />
         <input type="text" name="url" placeholder="url" /><br />
-        <input type="sub mit" value="submit" /><br />
+        <input type="submit" value="submit" /><br />
       </form>
     </div>
     `;
@@ -139,7 +134,7 @@ app.post(
     const user = req.session.user;
     await knex("bookmarks")
       .insert({ title, url, user: user.id })
-      .catch(err => {
+      .catch((err) => {
         return res.send("エラーが発生しました。");
       });
     return res.redirect("/");
@@ -196,7 +191,7 @@ app.post(
     const { mail, password: pass } = req.body;
     knex("users")
       .insert({ mail, pass })
-      .catch(err => {
+      .catch((err) => {
         error = "エラーが発生しました。";
         res.redirect("/signup");
       });
@@ -313,7 +308,7 @@ app.post(
     const num = await knex("users")
       .update({ pass: fresh })
       .where({ id: user.id })
-      .then(result => result[0]);
+      .then((result) => result[0]);
     console.log(num);
     res.redirect("/");
   })
@@ -335,7 +330,7 @@ app.get(
     }
     const html = ejs.render(view, {
       count: req.session.count,
-      limit: req.session.cookie.maxAge / 1000
+      limit: req.session.cookie.maxAge / 1000,
     });
     return res.send(html);
   })
