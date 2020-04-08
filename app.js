@@ -5,6 +5,7 @@ const validator = require("validator");
 const ejs = require("ejs");
 const redis = require("redis");
 const session = require("express-session");
+const bcrypt = require("bcrypt");
 const app = express();
 
 // initilize knex
@@ -185,8 +186,8 @@ app.post(
     }
   }),
   asyncHandler(async (req, res, next) => {
-    const { password: pass } = req.body;
-    if (validator.isLength(pass, { min: 4, max: 32 })) {
+    const { password } = req.body;
+    if (validator.isLength(password, { min: 4, max: 32 })) {
       next();
     } else {
       error = "パスワードは4字以上32字以内で登録可能です";
@@ -194,7 +195,12 @@ app.post(
     }
   }),
   asyncHandler(async (req, res) => {
-    const { mail, password: pass } = req.body;
+    const { mail, password } = req.body;
+
+    // パスワードハッシュ化
+    const salt = await bcrypt.genSalt(12);
+    const pass = await bcrypt.hash(password, salt);
+
     knex("users")
       .insert({ mail, pass })
       .catch((err) => {
@@ -234,16 +240,21 @@ app.get(
 app.post(
   "/login/callback",
   asyncHandler(async (req, res, next) => {
-    const { mail, password: pass } = req.body;
+    const { mail, password } = req.body;
 
-    const users = await knex("users").where({ mail, pass });
-    if (users.length === 1) {
-      // 認証成功
-      req.session.user = users[0];
+    const users = await knex("users").where({ mail });
+    if (users.length === 0) {
+      error = "メールアドレスが見つかりません。";
+      return res.redirect("/login");
+    }
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.pass);
+    if (isMatch) {
+      // パスワード合致
+      req.session.user = user;
       return res.redirect("/");
     }
-    // 認証失敗
-    error = "正しいメールアドレスかパスワードを入力してください";
+    error = "パスワードが一致しません。";
     return res.redirect("/login");
   })
 );

@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/yonedaco/node-me#readme",
   "dependencies": {
+    "bcrypt": "^3.0.0",
     "body-parser": "^1.18.2",
     "connect-redis": "^4.0.4",
     "dayjs": "^1.8.23",

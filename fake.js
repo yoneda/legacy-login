@@ -3,12 +3,12 @@ const fake = {
     {
       id: 1,
       mail: "test@test.com",
-      pass: "test"
+      pass: "$2b$12$JnwQ9QUZWxo4qbam2fY98uplOjift9tKbF.DcQ6QleWcWgxwOsSpe"
     },
     {
       id: 2,
       mail: "test2@test.com",
-      pass: "test2"
+      pass: "$2b$12$3NSBf0JMGhY0mACVlSG4r.mA5SlAmdhAiaSR2glHfVD/3P91jacuS"
     }
   ],
   bookmarks: [
