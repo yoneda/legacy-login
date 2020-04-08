@@ -1,9 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
-const session = require("express-session");
 const validator = require("validator");
 const ejs = require("ejs");
+const redis = require("redis");
+const session = require("express-session");
 const app = express();
 
 // initilize knex
@@ -21,9 +22,14 @@ const knex = require("knex")({
   useNullAsDefault: true,
 });
 
+// セッション管理にはredisを使う
+const RedisStore = require("connect-redis")(session);
+const redisClient = redis.createClient();
+
 // initialize session
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     secret: "legacy",
     resave: false,
     saveUninitialized: true,
