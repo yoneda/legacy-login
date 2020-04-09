@@ -6,6 +6,7 @@ const ejs = require("ejs");
 const redis = require("redis");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const request = require("superagent");
 const app = express();
 
 // initilize knex
@@ -156,7 +157,7 @@ app.get(
       <h2>Bookmark</h2>
       <%- nav %>
       <h3>Sighup:</h3>
-      <button>github</button><br />
+      <button onclick="onClick()">github</button><br /><br />
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
@@ -165,6 +166,13 @@ app.get(
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="create" /><br />
       </form>
+      <script>
+        const onClick = () => {
+          const url = "https://github.com/login/oauth/authorize";
+          const params = "?client_id=c0a3887ca38ee7f8a7fc";
+          window.location.href = url + "/" + params;
+        }
+      </script>
     </div>
     `;
     const html = ejs.render(view, { nav, error });
@@ -374,6 +382,30 @@ app.get(
 
     console.log("middleware D");
   }
+);
+
+app.get(
+  "/github/callback",
+  asyncHandler(async (req, res) => {
+    const code = req.query.code;
+    const options = {
+      client_id: "c0a3887ca38ee7f8a7fc",
+      client_secret: "fd9fabc31de160db383f26c0ea30d56ff148252a",
+      code,
+    };
+    const url = "https://github.com/login/oauth/access_token";
+    const { access_token } = await request
+      .post(url)
+      .send(options)
+      .then((d) => d.body);
+    const user = await request.get("https://api.github.com/user").set({
+      "Content-Type": "application/json",
+      "User-Agent": "test2",
+      Authorization: "Bearer " + access_token,
+    }).then(d=>d.body);
+    console.log(user);
+    res.send(user);
+  })
 );
 
 app.listen(3000);
