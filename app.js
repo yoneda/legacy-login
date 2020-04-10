@@ -9,6 +9,8 @@ const bcrypt = require("bcrypt");
 const request = require("superagent");
 const app = express();
 
+const { newPage } = require("./view");
+
 // initilize knex
 const knex = require("knex")({
   client: "sqlite3",
@@ -82,20 +84,8 @@ app.get(
     if (user === undefined) {
       return res.redirect("/login");
     }
-    const view = `
-    <div>
-      <h2>Bookmark</h2>
-      <%- loginedNav %>
-      <h3>New:</h3>
-      <form action="/new/done" method="post" autocomplete="off">
-        <input type="text" name="title" placeholder="title" /><br />
-        <input type="text" name="url" placeholder="url" /><br />
-        <input type="submit" value="submit" /><br />
-      </form>
-    </div>
-    `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = ejs.render(view, { user, bookmarks, loginedNav });
+    const html = ejs.render(newPage);
     res.send(html);
   })
 );
