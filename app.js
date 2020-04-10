@@ -54,34 +54,6 @@ app.set("view engine", "ejs");
 
 let error = undefined;
 
-// REST API
-app.get(
-  "/api/users/:id",
-  asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const user = await knex("users").where({ id });
-    return res.json(user);
-  })
-);
-
-app.get(
-  "/api/bookmarks",
-  asyncHandler(async (req, res) => {
-    const { user } = req.query;
-    const bookmarks = await knex("bookmarks").where({ user });
-    return res.json(bookmarks);
-  })
-);
-
-app.post(
-  "/api/bookmarks",
-  asyncHandler(async (req, res) => {
-    const { title, url } = req.body;
-    const success = await knex("bookmarks").insert({ title, url, user: 1 });
-    return res.json(success);
-  })
-);
-
 // Pages
 
 const nav = `
