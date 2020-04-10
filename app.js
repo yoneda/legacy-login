@@ -310,53 +310,6 @@ app.post(
 );
 
 app.get(
-  "/session-test",
-  asyncHandler(async (req, res) => {
-    const view = `
-    <div>
-      <span>count is… <%= count %></span>
-      <span>expires in… <%= limit %></span>
-    </div>
-    `;
-    if (req.session.count) {
-      req.session.count++;
-    } else {
-      req.session.count = 1;
-    }
-    const html = ejs.render(view, {
-      count: req.session.count,
-      limit: req.session.cookie.maxAge / 1000,
-    });
-    return res.send(html);
-  })
-);
-
-app.get(
-  "/onion/:id",
-  (req, res, next) => {
-    res.send("aa");
-    res.send("aa");
-    console.log("middleware A");
-    next();
-    console.log("middleware F");
-  },
-  (req, res, next) => {
-    console.log("middleware B");
-    next();
-    console.log("middleware E");
-  },
-  (req, res, next) => {
-    console.log("middleware C");
-    if (req.params.id === "1") {
-      res.send("hello");
-    }
-    res.send("no");
-
-    console.log("middleware D");
-  }
-);
-
-app.get(
   "/github/callback",
   asyncHandler(async (req, res) => {
     const code = req.query.code;
