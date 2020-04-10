@@ -4,7 +4,6 @@ const asyncHandler = require("express-async-handler");
 const validator = require("validator");
 const redis = require("redis");
 const session = require("express-session");
-const bcrypt = require("bcrypt");
 const request = require("superagent");
 const app = express();
 
@@ -65,15 +64,10 @@ let error = undefined;
 // Pages
 
 app.get("/new", asyncHandler(auth), asyncHandler(newHandler.get));
-
 app.post("/new", asyncHandler(newHandler.post));
-
 app.get("/", asyncHandler(auth), asyncHandler(homeHandler.get));
-
 app.get("/signup", asyncHandler(signupHandler.get));
-
 app.post("/signup", asyncHandler(signupHandler.post));
-
 app.get("/login", asyncHandler(loginHandler.get));
 
 app.post("/login", asyncHandler(loginHandler.post));

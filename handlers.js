@@ -105,3 +105,11 @@ exports.loginHandler = {
     return res.redirect("/login");
   },
 };
+
+exports.settingHandler = {
+  get: async function(req,res){
+    const html = setting({ error });
+    error = undefined;
+    return res.send(html);
+  },
+}
