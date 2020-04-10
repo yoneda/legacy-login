@@ -25,19 +25,21 @@ const menu = `
 </div>
 `;
 
-exports.new = () =>
-  ejs.render(`
-<div>
-  ${header}
-  ${authedMenu}
-  <h3>New:</h3>
-  <form action="/new/done" method="post" autocomplete="off">
-    <input type="text" name="title" placeholder="title" /><br />
-    <input type="text" name="url" placeholder="url" /><br />
-    <input type="submit" value="submit" /><br />
-  </form>
-</div>
-`);
+exports.new = function () {
+  const view = `
+  <div>
+    ${header}
+    ${authedMenu}
+    <h3>New:</h3>
+    <form action="/new" method="post" autocomplete="off">
+      <input type="text" name="title" placeholder="title" /><br />
+      <input type="text" name="url" placeholder="url" /><br />
+      <input type="submit" value="submit" /><br />
+    </form>
+  </div>
+  `;
+  return ejs.render(view);
+};
 
 exports.home = function ({ user, bookmarks }) {
   const view = `
@@ -66,7 +68,7 @@ exports.signup = function ({ error }) {
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
-      <form action="/signup/callback" method="post" autocomplete="off">
+      <form action="/signup" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="create" /><br />
@@ -93,7 +95,7 @@ exports.login = function ({ error }) {
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
-      <form action="/login/callback" method="post" autocomplete="off">
+      <form action="/login" method="post" autocomplete="off">
         <input type="text" name="mail" placeholder="mail" /><br />
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="login" /><br />

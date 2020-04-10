@@ -2,14 +2,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const validator = require("validator");
-const ejs = require("ejs");
 const redis = require("redis");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const request = require("superagent");
 const app = express();
 
-const { new: newPage, home, signup, login, setting } = require("./view");
+const { new: newPage, home, signup, login, setting } = require("./views");
+const {
+  auth,
+  newHandler,
+  homeHandler,
+  signupHandler,
+  loginHandler,
+} = require("./handlers");
 
 // initilize knex
 const knex = require("knex")({
@@ -58,135 +64,19 @@ let error = undefined;
 
 // Pages
 
-app.get(
-  "/new",
-  asyncHandler(async (req, res, next) => {
-    const user = req.session.user;
-    if (user === undefined) {
-      return res.redirect("/login");
-    }
-    const bookmarks = await knex("bookmarks").where({ user: user.id });
-    res.send(newPage());
-  })
-);
+app.get("/new", asyncHandler(auth), asyncHandler(newHandler.get));
 
-app.post(
-  "/new/done",
-  asyncHandler(async (req, res, next) => {
-    const { title, url } = req.body;
-    const user = req.session.user;
-    await knex("bookmarks")
-      .insert({ title, url, user: user.id })
-      .catch((err) => {
-        return res.send("エラーが発生しました。");
-      });
-    return res.redirect("/");
-  })
-);
+app.post("/new", asyncHandler(newHandler.post));
 
-app.get(
-  "/",
-  asyncHandler(async (req, res, next) => {
-    const user = req.session.user;
-    if (user === undefined) {
-      return res.redirect("/login");
-    }
-    const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = home({ user, bookmarks });
-    res.send(html);
-  })
-);
+app.get("/", asyncHandler(auth), asyncHandler(homeHandler.get));
 
-app.post(
-  "/",
-  asyncHandler(async (req, res, next) => {
-    const { title, url } = req.body;
-    const user = req.session.user;
-    await knex("bookmarks")
-      .insert({ title, url, user: user.id })
-      .catch((err) => {
-        return res.send("エラーが発生しました。");
-      });
-    return res.redirect("/");
-  })
-);
+app.get("/signup", asyncHandler(signupHandler.get));
 
-app.get(
-  "/signup",
-  asyncHandler(async (req, res) => {
-    const html = signup({ error });
-    error = undefined;
-    return res.send(html);
-  })
-);
+app.post("/signup", asyncHandler(signupHandler.post));
 
-app.post(
-  "/signup/callback",
-  asyncHandler(async (req, res, next) => {
-    const { mail } = req.body;
-    if (validator.isEmail(mail)) {
-      next();
-    } else {
-      error = "メールアドレスの形式で入力ください";
-      res.redirect("/signup");
-    }
-  }),
-  asyncHandler(async (req, res, next) => {
-    const { password } = req.body;
-    if (validator.isLength(password, { min: 4, max: 32 })) {
-      next();
-    } else {
-      error = "パスワードは4字以上32字以内で登録可能です";
-      res.redirect("/signup");
-    }
-  }),
-  asyncHandler(async (req, res) => {
-    const { mail, password } = req.body;
+app.get("/login", asyncHandler(loginHandler.get));
 
-    // パスワードハッシュ化
-    const salt = await bcrypt.genSalt(12);
-    const pass = await bcrypt.hash(password, salt);
-
-    knex("users")
-      .insert({ mail, pass })
-      .catch((err) => {
-        error = "エラーが発生しました。";
-        res.redirect("/signup");
-      });
-    return res.redirect("/login");
-  })
-);
-
-app.get(
-  "/login",
-  asyncHandler(async (req, res) => {
-    const html = login({ error });
-    error = undefined;
-    res.send(html);
-  })
-);
-
-app.post(
-  "/login/callback",
-  asyncHandler(async (req, res, next) => {
-    const { mail, password } = req.body;
-
-    const users = await knex("users").where({ mail });
-    if (users.length === 0) {
-      error = "メールアドレスが見つかりません。";
-      return res.redirect("/login");
-    }
-    const user = users[0];
-    const isMatch = await bcrypt.compare(password, user.pass);
-    if (isMatch) {
-      // パスワード合致
-      req.session.user = user;
-      return res.redirect("/");
-    }
-    error = "パスワードが一致しません。";
-    return res.redirect("/login");
-  })
-);
+app.post("/login", asyncHandler(loginHandler.post));
 
 app.post(
   "/logout",
@@ -200,7 +90,7 @@ app.post(
 app.get(
   "/setting",
   asyncHandler(async (req, res) => {
-    const html = setting({error});
+    const html = setting({ error });
     error = undefined;
     return res.send(html);
   })
