@@ -9,7 +9,7 @@ const bcrypt = require("bcrypt");
 const request = require("superagent");
 const app = express();
 
-const { newPage } = require("./view");
+const { new: newPage, home, signup, login, setting } = require("./view");
 
 // initilize knex
 const knex = require("knex")({
@@ -85,8 +85,7 @@ app.get(
       return res.redirect("/login");
     }
     const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = ejs.render(newPage);
-    res.send(html);
+    res.send(newPage());
   })
 );
 
@@ -111,21 +110,8 @@ app.get(
     if (user === undefined) {
       return res.redirect("/login");
     }
-    const view = `
-    <div>
-      <h2>Bookmark</h2>
-      <%- nav %>
-      <h3>User:</h3>
-      <%= user.mail %>
-      <h3>Contents:</h3>
-      <% bookmarks.forEach(item=>{ %>
-        <div>title: <%= item.title %></div>
-        <div>url: <%= item.url %></div>
-      <% }); %>
-    </div>
-    `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
-    const html = ejs.render(view, { user, bookmarks, nav: loginedNav });
+    const html = home({ user, bookmarks });
     res.send(html);
   })
 );
@@ -147,30 +133,7 @@ app.post(
 app.get(
   "/signup",
   asyncHandler(async (req, res) => {
-    const view = `
-    <div>
-      <h2>Bookmark</h2>
-      <%- nav %>
-      <h3>Sighup:</h3>
-      <button onclick="onClick()">github</button><br /><br />
-      <% if(error) { %>
-        <div style="color: red;"><%= error %></div><br />
-      <% } %>
-      <form action="/signup/callback" method="post" autocomplete="off">
-        <input type="text" name="mail" placeholder="mail" /><br />
-        <input type="text" name="password" placeholder="password" /><br />
-        <input type="submit" value="create" /><br />
-      </form>
-      <script>
-        const onClick = () => {
-          const url = "https://github.com/login/oauth/authorize";
-          const params = "?client_id=c0a3887ca38ee7f8a7fc";
-          window.location.href = url + "/" + params;
-        }
-      </script>
-    </div>
-    `;
-    const html = ejs.render(view, { nav, error });
+    const html = signup({ error });
     error = undefined;
     return res.send(html);
   })
@@ -216,23 +179,7 @@ app.post(
 app.get(
   "/login",
   asyncHandler(async (req, res) => {
-    const view = `
-    <div>
-      <h2>Bookmark</h2>
-      <%- nav %>
-      <h3>Login:</h3>
-      <button>github</button><br /><br />
-      <% if(error) { %>
-        <div style="color: red;"><%= error %></div><br />
-      <% } %>
-      <form action="/login/callback" method="post" autocomplete="off">
-        <input type="text" name="mail" placeholder="mail" /><br />
-        <input type="text" name="password" placeholder="password" /><br />
-        <input type="submit" value="login" /><br />
-      </form>
-    </div>
-    `;
-    const html = ejs.render(view, { nav, error });
+    const html = login({ error });
     error = undefined;
     res.send(html);
   })
@@ -272,26 +219,7 @@ app.post(
 app.get(
   "/setting",
   asyncHandler(async (req, res) => {
-    const view = `
-    <div>
-      <h2>Bookmark</h2>
-      <%- loginedNav %>
-      <h3>Change:</h3>
-      <% if(error) { %>
-        <div style="color: red;"><%= error %></div><br />
-      <% } %>
-      <form action="/setting/changePassword" method="post" autocomplete="off">
-        <input type="text" name="current" placeholder="current" /><br />
-        <input type="text" name="fresh" placeholder="fresh" /><br />
-        <input type="submit" value="update" /><br />
-      </form>
-      <h3>Logout:</h3>
-      <form action="/logout" method="post" autocomplete="off">
-        <input type="submit" value="logout" /><br />
-      </form>
-    </div>
-    `;
-    const html = ejs.render(view, { loginedNav, error });
+    const html = setting({error});
     error = undefined;
     return res.send(html);
   })
