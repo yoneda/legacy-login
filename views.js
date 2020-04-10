@@ -114,7 +114,7 @@ exports.setting = function ({ error }) {
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
-      <form action="/setting/changePassword" method="post" autocomplete="off">
+      <form action="/update" method="post" autocomplete="off">
         <input type="text" name="current" placeholder="current" /><br />
         <input type="text" name="fresh" placeholder="fresh" /><br />
         <input type="submit" value="update" /><br />
