@@ -231,7 +231,7 @@ app.get(
       <h2>Bookmark</h2>
       <%- nav %>
       <h3>Login:</h3>
-      <button>github</button><br />
+      <button>github</button><br /><br />
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
