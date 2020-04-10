@@ -58,8 +58,6 @@ let error = undefined;
 
 const nav = `
 <div>
-  <span><a href="/">home</a></span>
-  <span> |</span>
   <span><a href="/signup">signup</a></span>
   <span> |</span>
   <span><a href="/login">login</a></span>
@@ -71,9 +69,50 @@ const loginedNav = `
 <div>
   <span><a href="/">home</a></span>
   <span> |</span>
+  <span><a href="/new">new</a></span>
+  <span> |</span>
   <span><a href="/setting">setting</a></span>
 </div>
 `;
+
+app.get(
+  "/new",
+  asyncHandler(async (req, res, next) => {
+    const user = req.session.user;
+    if (user === undefined) {
+      return res.redirect("/login");
+    }
+    const view = `
+    <div>
+      <h2>Bookmark</h2>
+      <%- loginedNav %>
+      <h3>New:</h3>
+      <form action="/new/done" method="post" autocomplete="off">
+        <input type="text" name="title" placeholder="title" /><br />
+        <input type="text" name="url" placeholder="url" /><br />
+        <input type="submit" value="submit" /><br />
+      </form>
+    </div>
+    `;
+    const bookmarks = await knex("bookmarks").where({ user: user.id });
+    const html = ejs.render(view, { user, bookmarks, loginedNav });
+    res.send(html);
+  })
+);
+
+app.post(
+  "/new/done",
+  asyncHandler(async (req, res, next) => {
+    const { title, url } = req.body;
+    const user = req.session.user;
+    await knex("bookmarks")
+      .insert({ title, url, user: user.id })
+      .catch((err) => {
+        return res.send("エラーが発生しました。");
+      });
+    return res.redirect("/");
+  })
+);
 
 app.get(
   "/",
@@ -93,12 +132,6 @@ app.get(
         <div>title: <%= item.title %></div>
         <div>url: <%= item.url %></div>
       <% }); %>
-      <h3>Add:</h3>
-      <form action="/" method="post" autocomplete="off">
-        <input type="text" name="title" placeholder="title" /><br />
-        <input type="text" name="url" placeholder="url" /><br />
-        <input type="submit" value="submit" /><br />
-      </form>
     </div>
     `;
     const bookmarks = await knex("bookmarks").where({ user: user.id });
@@ -323,11 +356,14 @@ app.get(
       .post(url)
       .send(options)
       .then((d) => d.body);
-    const user = await request.get("https://api.github.com/user").set({
-      "Content-Type": "application/json",
-      "User-Agent": "test2",
-      Authorization: "Bearer " + access_token,
-    }).then(d=>d.body);
+    const user = await request
+      .get("https://api.github.com/user")
+      .set({
+        "Content-Type": "application/json",
+        "User-Agent": "test2",
+        Authorization: "Bearer " + access_token,
+      })
+      .then((d) => d.body);
     console.log(user);
     res.send(user);
   })
