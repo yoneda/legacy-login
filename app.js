@@ -58,25 +58,6 @@ let error = undefined;
 
 // Pages
 
-const nav = `
-<div>
-  <span><a href="/signup">signup</a></span>
-  <span> |</span>
-  <span><a href="/login">login</a></span>
-  <span> |</span>
-</div>
-`;
-
-const loginedNav = `
-<div>
-  <span><a href="/">home</a></span>
-  <span> |</span>
-  <span><a href="/new">new</a></span>
-  <span> |</span>
-  <span><a href="/setting">setting</a></span>
-</div>
-`;
-
 app.get(
   "/new",
   asyncHandler(async (req, res, next) => {
