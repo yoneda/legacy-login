@@ -1,5 +1,4 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const redis = require("redis");
 const session = require("express-session");
 const request = require("superagent");
@@ -22,14 +21,8 @@ app.use(
   })
 );
 
-// 静的ファイル(image,css,javascript) をpublic フォルダに格納。
-// test.pngにアクセスしたいときは、
-// http://localhost:3000/test.png
-app.use(express.static(__dirname + "/public"));
-
-// bodyParser の初期化
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(router);
 
