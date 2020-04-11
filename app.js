@@ -1,18 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const asyncHandler = require("express-async-handler");
 const redis = require("redis");
 const session = require("express-session");
 const request = require("superagent");
 const app = express();
-const {
-  auth,
-  newHandler,
-  homeHandler,
-  signupHandler,
-  loginHandler,
-  settingHandler,
-} = require("./handlers");
+const router = require("./router");
+const asyncHandler = require("express-async-handler");
 
 // セッション管理にはredisを使う
 const RedisStore = require("connect-redis")(session);
@@ -38,21 +31,7 @@ app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// ejs の初期化
-app.set("views", __dirname + "/views");
-app.set("view engine", "ejs");
-
-// Pages
-app.get("/new", asyncHandler(auth), asyncHandler(newHandler.get));
-app.post("/new", asyncHandler(newHandler.post));
-app.get("/", asyncHandler(auth), asyncHandler(homeHandler.get));
-app.get("/signup", asyncHandler(signupHandler.get));
-app.post("/signup", asyncHandler(signupHandler.post));
-app.get("/login", asyncHandler(loginHandler.get));
-app.post("/login", asyncHandler(loginHandler.post));
-app.post("/logout", asyncHandler(settingHandler.logout));
-app.get("/setting", asyncHandler(settingHandler.get));
-app.post("/update", asyncHandler(settingHandler.updatePass));
+app.use(router);
 
 app.get(
   "/github/callback",
