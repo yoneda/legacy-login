@@ -1,5 +1,7 @@
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const config = require("../knexfile");
+const knex = require("knex")(config);
 const { signup } = require("../views");
 
 let error = undefined;
