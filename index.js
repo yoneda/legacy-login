@@ -5,52 +5,45 @@ const request = require("superagent");
 const app = express();
 const router = require("./router");
 const asyncHandler = require("express-async-handler");
+const env = require("dotenv");
 
-// セッション管理にはredisを使う
-const RedisStore = require("connect-redis")(session);
-const redisClient = redis.createClient();
+env.config();
 
-// initialize session
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: "legacy",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 }, // 1時間で消える
-  })
-);
+const isDev = process.env.NODE_ENV;
+if (isDev) {
+  // インメモリでセッション管理
+  app.use(
+    session({
+      secret: process.env.SECRET || "legacy",
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 60 * 60 * 1000 }, // 1時間で消える
+    })
+  );
+} else {
+  // redis でセッション管理
+  const RedisStore = require("connect-redis")(session);
+  const redisClient = redis.createClient();
 
+  app.use(
+    session({
+      store: new RedisStore({ client: redisClient }),
+      secret: process.env.SECRET || "legacy",
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 60 * 60 * 1000 }, // 1時間で消える
+    })
+  );
+}
+
+// use body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// apply all router
 app.use(router);
 
-app.get(
-  "/github/callback",
-  asyncHandler(async (req, res) => {
-    const code = req.query.code;
-    const options = {
-      client_id: "c0a3887ca38ee7f8a7fc",
-      client_secret: "fd9fabc31de160db383f26c0ea30d56ff148252a",
-      code,
-    };
-    const url = "https://github.com/login/oauth/access_token";
-    const { access_token } = await request
-      .post(url)
-      .send(options)
-      .then((d) => d.body);
-    const user = await request
-      .get("https://api.github.com/user")
-      .set({
-        "Content-Type": "application/json",
-        "User-Agent": "test2",
-        Authorization: "Bearer " + access_token,
-      })
-      .then((d) => d.body);
-    console.log(user);
-    res.send(user);
-  })
-);
-
-app.listen(3000);
+const port = process.env.PORT || 3000;
+app.listen(port, function () {
+  console.log(`app started! listening on ${port}`);
+});
