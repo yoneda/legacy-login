@@ -2,6 +2,18 @@ const request = require("superagent");
 const config = require("../knexfile");
 const knex = require("knex")(config);
 
+// MEMO:
+// Githubログインが含められるとすこしややこしくなる
+// 原状のコードではsignupもloginも後者で済ませている
+// ユーザ登録
+// * Githubのサイトに飛んでログイン(アカウントIDを取得)
+// * アカウントIDをDBに登録
+// ユーザ認証(ログイン)
+// * Githubのサイトに飛んでログイン(アカウントIDを取得)
+// * アカウントIDと一致するユーザがいるか調べる、存在すればログイン完了
+// * いなければアカウントIDをDBに登録(ユーザ登録と同じ作業)
+// * セッションにユーザ情報を追加する
+
 module.exports = async function (req, res) {
   const { code } = req.query;
   const url = "https://github.com/login/oauth/access_token";
