@@ -24,8 +24,8 @@ module.exports = {
     }
     // パスワードハッシュ化
     const pass = await bcrypt.hash(password, 12);
-    knex("users")
-      .insert({ mail, pass })
+    await knex("users")
+      .insert({ mail, pass, github: "" })
       .catch((err) => {
         error = "エラーが発生しました。";
         res.redirect("/signup");

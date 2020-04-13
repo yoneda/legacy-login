@@ -8,7 +8,8 @@ let error = undefined;
 
 module.exports = {
   get: async function (req, res) {
-    const html = setting({ error });
+    const user = req.session.user;
+    const html = setting({ user, error });
     error = undefined;
     return res.send(html);
   },

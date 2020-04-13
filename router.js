@@ -21,6 +21,9 @@ router.post("/update", asyncHandler(setting.updatePass));
 router.get("/new", asyncHandler(auth), asyncHandler(newHandler.get));
 router.post("/new", asyncHandler(newHandler.post));
 
+const config = require("./knexfile");
+const knex = require("knex")(config);
+
 const request = require("superagent");
 router.get(
   "/github",
@@ -44,7 +47,19 @@ router.get(
       .set("User-Agent", "")
       .set("Authorization", `token ${access_token}`)
       .then((d) => d.body);
-    res.send(`your gh account is ${login}`);
+
+    // 既に登録済みのユーザであったか
+    const users = await knex("users").where({ github: login });
+    if (users.length === 1) {
+      // githubでログイン成功
+      req.session.user = users[0];
+      return res.redirect("/");
+    }
+    // githubでのログイン失敗
+    // ユーザを新規登録
+    await knex("users").insert({ mail: "", pass: "", github: login });
+    req.session.user = users[0];
+    return res.redirect("/");
   })
 );
 

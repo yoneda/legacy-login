@@ -47,7 +47,8 @@ exports.home = function ({ user, bookmarks }) {
     ${header}
     ${authedMenu}
     <h3>User:</h3>
-    <%= user.mail %>
+    <%= user.mail && user.mail + " (mail)" %>
+    <%= user.github && user.github + " (github)"  %>
     <h3>Contents:</h3>
     <% bookmarks.forEach(item=>{ %>
       <div>title: <%= item.title %></div>
@@ -91,7 +92,7 @@ exports.login = function ({ error }) {
       ${header}
       ${menu}
       <h3>Login:</h3>
-      <button>github</button><br /><br />
+      <button onclick="onClick()">github</button><br /><br />
       <% if(error) { %>
         <div style="color: red;"><%= error %></div><br />
       <% } %>
@@ -100,30 +101,39 @@ exports.login = function ({ error }) {
         <input type="text" name="password" placeholder="password" /><br />
         <input type="submit" value="login" /><br />
       </form>
+      <script>
+        const onClick = () => {
+          const url = "https://github.com/login/oauth/authorize";
+          const params = "?client_id=c0a3887ca38ee7f8a7fc";
+          window.location.href = url + "/" + params;
+        }
+      </script>
     </div>
     `;
   return ejs.render(view, { error });
 };
 
-exports.setting = function ({ error }) {
+exports.setting = function ({ user, error }) {
   const view = `
     <div>
       ${header}
       ${authedMenu}
-      <h3>Change:</h3>
-      <% if(error) { %>
-        <div style="color: red;"><%= error %></div><br />
+      <% if(user.mail){ %>
+        <h3>Change:</h3>
+        <% if(error) { %>
+          <div style="color: red;"><%= error %></div><br />
+        <% } %>
+        <form action="/update" method="post" autocomplete="off">
+          <input type="text" name="current" placeholder="current" /><br />
+          <input type="text" name="fresh" placeholder="fresh" /><br />
+          <input type="submit" value="update" /><br />
+        </form>
       <% } %>
-      <form action="/update" method="post" autocomplete="off">
-        <input type="text" name="current" placeholder="current" /><br />
-        <input type="text" name="fresh" placeholder="fresh" /><br />
-        <input type="submit" value="update" /><br />
-      </form>
       <h3>Logout:</h3>
       <form action="/logout" method="post" autocomplete="off">
         <input type="submit" value="logout" /><br />
       </form>
     </div>
     `;
-  return ejs.render(view, { error });
+  return ejs.render(view, { user, error });
 };

@@ -7,11 +7,13 @@ const initialDB = {
       id: 1,
       mail: "test@test.com",
       pass: "$2b$12$JnwQ9QUZWxo4qbam2fY98uplOjift9tKbF.DcQ6QleWcWgxwOsSpe",
+      github: "",
     },
     {
       id: 2,
       mail: "test2@test.com",
       pass: "$2b$12$3NSBf0JMGhY0mACVlSG4r.mA5SlAmdhAiaSR2glHfVD/3P91jacuS",
+      github: "",
     },
   ],
   bookmarks: [
@@ -51,6 +53,7 @@ const migrate = async function () {
       table.increments("id");
       table.string("mail");
       table.string("pass");
+      table.string("github");
     })
     .createTable("bookmarks", (table) => {
       table.increments("id");
