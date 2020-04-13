@@ -4,6 +4,7 @@ const login = require("./login");
 const newHandler = require("./new");
 const auth = require("./auth");
 const setting = require("./setting");
+const github = require("./github");
 
 module.exports = {
   home,
@@ -11,5 +12,6 @@ module.exports = {
   login,
   setting,
   auth,
+  github,
   new: newHandler,
 };
