@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/yonedaco/node-me#readme",
   "dependencies": {
-    "bcrypt": "^3.0.0",
+    "bcrypt": "^5.0.0",
     "connect-redis": "^4.0.4",
     "dayjs": "^1.8.23",
     "dotenv": "^8.2.0",
